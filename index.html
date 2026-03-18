@@ -1,183 +1,470 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat con San Martín</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --celeste: #74ACDF;
+    --blanco: #FFFFFF;
+    --dorado: #C8A951;
+    --dorado-claro: #e8c96a;
+    --verde-oscuro: #1a3a2a;
+    --bg: #1a1a1a;
+    --papel: #f5f0e8;
+    --papel-dark: #e8e0cc;
+    --tinta: #2c1f0e;
+    --burbuja-user: #dcf3c8;
+    --burbuja-bot: #fffdf7;
+    --shadow: rgba(0,0,0,0.35);
+  }
 
-body{
-font-family: Arial;
-background:#e5ddd5;
-margin:0;
-display:flex;
-justify-content:center;
-height:100vh;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.chat-container{
-width:420px;
-background:white;
-display:flex;
-flex-direction:column;
-border-radius:10px;
-overflow:hidden;
-box-shadow:0 0 20px rgba(0,0,0,0.2);
-}
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(116,172,223,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(200,169,81,0.08) 0%, transparent 50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
 
-.header{
-background:#075E54;
-color:white;
-padding:15px;
-display:flex;
-align-items:center;
-gap:10px;
-}
+  .chat-container {
+    width: 440px;
+    height: 700px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(200,169,81,0.3);
+    position: relative;
+  }
 
-.avatar{
-width:35px;
-height:35px;
-border-radius:50%;
-background:#ccc;
-}
+  /* HEADER */
+  .header {
+    background: var(--verde-oscuro);
+    background-image: linear-gradient(135deg, #1a3a2a 0%, #0d2018 100%);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 2px solid var(--dorado);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
 
-.chat{
-flex:1;
-padding:15px;
-overflow-y:auto;
-background:#ece5dd;
-}
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(200,169,81,0.08);
+  }
 
-.msg{
-max-width:75%;
-padding:10px 14px;
-border-radius:10px;
-margin-bottom:10px;
-font-size:14px;
-}
+  .avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
 
-.user{
-background:#dcf8c6;
-margin-left:auto;
-}
+  .avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--dorado);
+    background: linear-gradient(145deg, #2a5a3a, #0d2018);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    overflow: hidden;
+  }
 
-.bot{
-background:white;
-}
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
 
-.input-area{
-display:flex;
-border-top:1px solid #ddd;
-}
+  .status-dot {
+    position: absolute;
+    bottom: 2px; right: 2px;
+    width: 10px; height: 10px;
+    background: #4caf50;
+    border-radius: 50%;
+    border: 2px solid var(--verde-oscuro);
+  }
 
-input{
-flex:1;
-border:none;
-padding:14px;
-font-size:14px;
-outline:none;
-}
+  .header-info {
+    flex: 1;
+  }
 
-button{
-background:#25D366;
-border:none;
-color:white;
-padding:0 20px;
-cursor:pointer;
-}
+  .header-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dorado-claro);
+    letter-spacing: 0.3px;
+  }
 
+  .header-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .header-badge {
+    font-size: 10px;
+    background: rgba(200,169,81,0.2);
+    border: 1px solid rgba(200,169,81,0.4);
+    color: var(--dorado-claro);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  /* CHAT AREA */
+  .chat {
+    flex: 1;
+    padding: 20px 16px;
+    overflow-y: auto;
+    background: var(--papel);
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a951' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+
+  .chat::-webkit-scrollbar { width: 4px; }
+  .chat::-webkit-scrollbar-track { background: transparent; }
+  .chat::-webkit-scrollbar-thumb { background: var(--dorado); border-radius: 4px; opacity: 0.5; }
+
+  /* FECHA */
+  .date-divider {
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    background: rgba(200,169,81,0.12);
+    border: 1px solid rgba(200,169,81,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    align-self: center;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* MENSAJES */
+  .msg-wrap {
+    display: flex;
+    flex-direction: column;
+    max-width: 82%;
+    animation: fadeSlideIn 0.3s ease;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-wrap.user { align-self: flex-end; align-items: flex-end; }
+  .msg-wrap.bot  { align-self: flex-start; align-items: flex-start; }
+
+  .msg {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--tinta);
+    position: relative;
+    word-break: break-word;
+  }
+
+  .msg-wrap.user .msg {
+    background: var(--burbuja-user);
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .msg-wrap.bot .msg {
+    background: var(--burbuja-bot);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    border-left: 3px solid var(--dorado);
+  }
+
+  .msg-time {
+    font-size: 10px;
+    color: #aaa;
+    margin-top: 3px;
+    padding: 0 4px;
+  }
+
+  /* TYPING INDICATOR */
+  .typing-wrap {
+    display: none;
+    align-self: flex-start;
+    max-width: 82%;
+  }
+
+  .typing-wrap.visible { display: flex; flex-direction: column; }
+
+  .typing {
+    background: var(--burbuja-bot);
+    border-left: 3px solid var(--dorado);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    padding: 12px 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .typing span {
+    width: 7px; height: 7px;
+    background: var(--dorado);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: white;
+    border-top: 1px solid var(--papel-dark);
+    padding: 10px 12px;
+    flex-shrink: 0;
+  }
+
+  .input-area input {
+    flex: 1;
+    border: 1px solid var(--papel-dark);
+    background: var(--papel);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'Lato', sans-serif;
+    outline: none;
+    border-radius: 24px;
+    color: var(--tinta);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-area input:focus {
+    border-color: var(--dorado);
+    box-shadow: 0 0 0 3px rgba(200,169,81,0.15);
+  }
+
+  .input-area input::placeholder { color: #bbb; }
+
+  .send-btn {
+    background: linear-gradient(135deg, var(--verde-oscuro), #2a5a3a);
+    border: none;
+    color: var(--dorado-claro);
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  .send-btn:hover { transform: scale(1.07); box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .send-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  /* FOOTER */
+  .footer {
+    background: var(--verde-oscuro);
+    text-align: center;
+    padding: 6px;
+    font-size: 10px;
+    color: rgba(200,169,81,0.5);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ERROR */
+  .error-msg {
+    align-self: center;
+    background: #fff0f0;
+    border: 1px solid #ffcccc;
+    color: #c0392b;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    animation: fadeSlideIn 0.3s ease;
+  }
 </style>
-
 </head>
-
 <body>
 
 <div class="chat-container">
 
-<div class="header">
-<div class="avatar"></div>
-<div>
-<b>General San Martín</b><br>
-<small>en línea</small>
-</div>
-</div>
+  <div class="header">
+    <div class="avatar-wrap">
+      <div class="avatar">⚔️</div>
+      <div class="status-dot"></div>
+    </div>
+    <div class="header-info">
+      <div class="header-name">General San Martín</div>
+      <div class="header-sub">Libertador de América · en línea</div>
+    </div>
+    <div class="header-badge">🩵 1778</div>
+  </div>
 
-<div id="chat" class="chat"></div>
+  <div id="chat" class="chat">
+    <div class="date-divider">HOY</div>
+    <div class="typing-wrap" id="typing">
+      <div class="typing">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
 
-<div class="input-area">
-<input id="msg" placeholder="Escribí un mensaje..." />
-<button onclick="send()">Enviar</button>
-</div>
+  <div class="input-area">
+    <input id="msg" placeholder="Escribí un mensaje..." autocomplete="off" />
+    <button class="send-btn" id="sendBtn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="footer">⭐ PROVINCIAS UNIDAS DEL RÍO DE LA PLATA ⭐</div>
 
 </div>
 
 <script>
+  const WEBHOOK = "https://n8n.mtrpymes.com.ar/webhook/144f26ae-b3b7-4d5f-b4f9-5b9c4d8cdbfe";
+  const SESSION = "webuser_" + Math.random().toString(36).slice(2, 8); // sesión única por visita
 
-const webhook = "https://n8n.mtrpymes.com.ar/webhook/144f26ae-b3b7-4d5f-b4f9-5b9c4d8cdbfe"
+  let history = JSON.parse(localStorage.getItem("sanmartin_chat") || "[]");
+  const chatEl = document.getElementById("chat");
+  const typingEl = document.getElementById("typing");
+  const sendBtn = document.getElementById("sendBtn");
+  const msgInput = document.getElementById("msg");
 
-let history = JSON.parse(localStorage.getItem("sanmartin_chat") || "[]")
+  function getTime() {
+    return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
 
-const chat = document.getElementById("chat")
+  function addMessage(role, text) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg-wrap " + role;
 
-function render(){
+    const msg = document.createElement("div");
+    msg.className = "msg";
+    msg.innerText = text;
 
-chat.innerHTML=""
+    const time = document.createElement("div");
+    time.className = "msg-time";
+    time.innerText = getTime();
 
-history.forEach(m => {
+    wrap.appendChild(msg);
+    wrap.appendChild(time);
 
-const div = document.createElement("div")
+    // insertar antes del typing indicator
+    chatEl.insertBefore(wrap, typingEl);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
 
-div.className="msg "+m.role
-div.innerText = m.text
+  function showTyping(show) {
+    typingEl.className = show ? "typing-wrap visible" : "typing-wrap";
+    if (show) chatEl.scrollTop = chatEl.scrollHeight;
+  }
 
-chat.appendChild(div)
+  function showError(msg) {
+    const err = document.createElement("div");
+    err.className = "error-msg";
+    err.innerText = msg;
+    chatEl.insertBefore(err, typingEl);
+    chatEl.scrollTop = chatEl.scrollHeight;
+    setTimeout(() => err.remove(), 4000);
+  }
 
-})
+  // Renderizar historial guardado
+  history.forEach(m => addMessage(m.role, m.text));
 
-chat.scrollTop = chat.scrollHeight
+  // Enviar con Enter
+  msgInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
 
-}
+  async function send() {
+    const text = msgInput.value.trim();
+    if (!text) return;
 
-render()
+    // UI
+    msgInput.value = "";
+    sendBtn.disabled = true;
+    addMessage("user", text);
+    history.push({ role: "user", text });
+    showTyping(true);
 
-async function send(){
+    try {
+      const res = await fetch(WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text,         // ✅ campo correcto para n8n
+          session: SESSION
+        })
+      });
 
-const input = document.getElementById("msg")
-const text = input.value.trim()
+      if (!res.ok) throw new Error("Error " + res.status);
 
-if(!text) return
+      const data = await res.json();
 
-history.push({role:"user",text})
+      // ✅ n8n AI Agent devuelve { output: "..." }
+      const reply = data.output || data.reply || data.text || "No pude obtener respuesta.";
 
-render()
+      showTyping(false);
+      addMessage("bot", reply);
+      history.push({ role: "bot", text: reply });
+      localStorage.setItem("sanmartin_chat", JSON.stringify(history));
 
-input.value=""
-
-const res = await fetch(webhook,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:text,
-session:"webuser"
-})
-})
-
-const data = await res.json()
-
-history.push({
-role:"bot",
-text:data.reply
-})
-
-localStorage.setItem("sanmartin_chat",JSON.stringify(history))
-
-render()
-
-}
-
+    } catch (err) {
+      showTyping(false);
+      showError("⚠️ No se pudo conectar con el General. Intentá de nuevo.");
+      console.error(err);
+    } finally {
+      sendBtn.disabled = false;
+      msgInput.focus();
+    }
+  }
 </script>
-
 </body>
 </html>
